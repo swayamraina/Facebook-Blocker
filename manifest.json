@@ -1,0 +1,24 @@
+{
+  "manifest_version": 2,
+
+  "name": "Facebook-Blokr",
+  "description": "This extension blocks facebook between specified time interval",
+  "version": "1.0",
+  "author": "swayam",
+
+  "browser_action": {
+    "default_icon": "Facebook-blokr-icon.png",
+    "default_popup": "popup.html"
+  },
+
+  "permissions": [
+    "tabs"
+  ],
+
+  "content_scripts": [
+      {
+        "matches": ["https://www.facebook.com/*"],
+        "js": ["popup.js"]
+      }
+  ]
+}
