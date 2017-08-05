@@ -1,11 +1,19 @@
-var minutes = loadSynchronizedMinutesValue();
-var seconds = loadSynchronizedSecondsValue();
+var minutes = 0;
+var seconds = 0;
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	minutes = 0;
+	seconds = 60;
+	updateLastUpdated(request.timestamp);
+});
 
 var timer = setInterval(function() {
-	updateTime();
+	if(minutes!=0 || seconds!=0) {
+		updateTime();
+		updateTimer();
+	}
 	updateDisplay();
-	updateTimer();
-}, 1000);
+}, 1000);  
 
 function updateTime() {
 	updateSeconds();
@@ -18,7 +26,15 @@ function updateSeconds() {
 	}
 	seconds = (seconds-1)%60;
 	saveToDB("seconds", seconds);
-	saveToDB("lastUpdated", new Date());
+
+	var lastUpdate = new Date();
+	var jsonLasUpdate = {
+							"day": lastUpdate.getDay(), 
+			          		"hours": lastUpdate.getHours(),
+			          		"minutes": lastUpdate.getMinutes(),
+			            	"seconds": lastUpdate.getSeconds()
+			            };
+	updateLastUpdated(jsonLasUpdate);
 }
 
 function updateMinutes() {
@@ -32,8 +48,16 @@ function updateDisplay() {
 	if(getFromDB("facebook-blocker")) {
 		document.getElementById('timer').innerHTML = "Enough of facebook today!";
 	} else {
-		document.getElementById('timer').innerHTML = getTimeForDisplay(minutes) + " : " + getTimeForDisplay(seconds);
+		if(seconds==0 && minutes==0) {
+			document.getElementById('timer').innerHTML = "Have a Productive day!";
+		} else {
+			document.getElementById('timer').innerHTML = getTimeForDisplay(minutes) + " : " + getTimeForDisplay(seconds);
+		}
 	}
+}
+
+function updateLastUpdated(timestamp) {
+	saveToDB("lastUpdated", JSON.stringify(timestamp));
 }
 
 function getTimeForDisplay(data) {
