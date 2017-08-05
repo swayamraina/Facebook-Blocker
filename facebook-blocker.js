@@ -1,55 +1,43 @@
+init();
 
-var minutes = 0;
-var seconds = 30;
+var run = setTimeout(function() {
+	kickStartBlocker();
+}, getTime());
 
-var run = setInterval(function() {
-	facebook_blocker();
-}, 1000);
-
-function facebook_blocker() {
-	console.log("here");
-	updateTime();
+function getTime() {
+	return getFromDB("facebook-blocker") ? 1000 : 1000*60*10;
 }
 
-function updateTime() {
-	updateSeconds();
-	updateMinutes();
-}
-
-function updateSeconds() {
-	if(seconds==0) {
-		seconds = 60;
-	}
-	seconds = (seconds-1)%60;
-
-	saveToDB("seconds", seconds);
-	triggerBlockerIfRequired();
-}
-
-function updateMinutes() {
-	if(seconds==0 && minutes>0) {
-		minutes = minutes-1;
-		saveToDB("minutes", minutes);
+function init() {
+	if(getFromDB("blocker-start") == null) {
+		setTimestamp(new Date());
+		// pass message here
+	} else {
+		var previousTimestamp = getFromDB("blocker-start");
+		var newTimestamp = new Date();
+		if(validateTimestamp(previousTimestamp, newTimestamp)) {
+			setTimestamp(newTimestamp);
+			saveToDB("facebook-blocker", false);
+		}
 	}
 }
 
-function triggerBlockerIfRequired() {
-	if(getFromDB("blocker-start") || (minutes==0 && seconds==0)) {
-		kickStartBlocker();
-		saveToDB("blocker-start", true);
-	}
+function validateTimestamp(oldT, newT) {
+	var dayDiff = newT.getDay() - oldT.getDay();
+	return (((dayDiff*24 + newT.getHours()) - oldT.getHours()) > 8) ? true : false;
 }
 
 function kickStartBlocker() {
-	// hide everything from facebook
 	document.getElementsByTagName('body')[0].remove();
-
-	// add empty body element
-	// TODO : add ne wfeatures here
 	document.body = document.createElement("body");
 
-	//  stop processing
-	clearInterval(run);
+	if(!getFromDB("facebook-blocker")) {
+		saveToDB("facebook-blocker", true);
+	}
+}
+
+function setTimestamp(data) {
+	saveToDB("blocker-start", data);
 }
 
 function saveToDB(key, value) {
