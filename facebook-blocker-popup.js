@@ -1,5 +1,6 @@
-var minutes = 0;
-var seconds = 0;
+var lastUpdate = JSON.parse(getFromDB("lastUpdated"));
+var minutes = getFromDB("minutes") != null ? syncMinutes() : 0;
+var seconds = getFromDB("seconds") != null ? syncSeconds() : 0;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	minutes = 0;
@@ -33,7 +34,7 @@ function updateSeconds() {
 			          		"hours": lastUpdate.getHours(),
 			          		"minutes": lastUpdate.getMinutes(),
 			            	"seconds": lastUpdate.getSeconds()
-			            };
+			             };
 	updateLastUpdated(jsonLastUpdate);
 }
 
@@ -69,6 +70,20 @@ function updateTimer() {
 		saveToDB("facebook-blocker", true);
 		clearInterval(timer);
 	}
+}
+
+function syncMinutes() {
+	var currentTime = new Date();
+	var currentMinutes = currentTime.getHours()*60 + currentTime.getMinutes();
+	var lastUpdateMinutes = 60*lastUpdate.hours + lastUpdate.minutes;
+	return (getFromDB("minutes") - (currentMinutes-lastUpdateMinutes));
+}
+
+function syncSeconds() {
+	var currentTime = new Date();
+	var currentSeconds = currentTime.getMinutes()*60 + currentTime.getSeconds();
+	var lastUpdateSeconds = 60*lastUpdate.minutes + lastUpdate.seconds;
+	return (getFromDB("seconds") - (currentSeconds-lastUpdateSeconds));
 }
 
 function getFromDB(key) {
