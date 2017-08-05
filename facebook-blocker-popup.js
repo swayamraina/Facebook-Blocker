@@ -77,16 +77,22 @@ function updateTimer() {
 
 function syncMinutes() {
 	var currentTime = new Date();
-	var currentMinutes = currentTime.getHours()*60 + currentTime.getMinutes();
-	var lastUpdateMinutes = 60*lastUpdate.hours + lastUpdate.minutes;
-	return (getFromDB("minutes") - (currentMinutes-lastUpdateMinutes));
+	var minutesDiff = (currentTime.getHours()*60 + currentTime.getMinutes()) - (60*lastUpdate.hours + lastUpdate.minutes);
+	return (getFromDB("minutes") - minutesDiff);
 }
 
 function syncSeconds() {
 	var currentTime = new Date();
-	var currentSeconds = currentTime.getMinutes()*60 + currentTime.getSeconds();
-	var lastUpdateSeconds = 60*lastUpdate.minutes + lastUpdate.seconds;
-	return (getFromDB("seconds") - (currentSeconds-lastUpdateSeconds));
+	var secondsDiff = (currentTime.getMinutes()*60 + currentTime.getSeconds()) - (60*lastUpdate.minutes + lastUpdate.seconds);	
+	if(getFromDB("seconds") > secondsDiff) {
+		return getFromDB("seconds") - secondsDiff;
+	} else {
+		if(minutes==0) {
+			return 0;
+		} else {
+			return 60+getFromDB("seconds") - secondsDiff;
+		}
+	}
 }
 
 function getFromDB(key) {
