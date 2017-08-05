@@ -28,13 +28,13 @@ function updateSeconds() {
 	saveToDB("seconds", seconds);
 
 	var lastUpdate = new Date();
-	var jsonLasUpdate = {
+	var jsonLastUpdate = {
 							"day": lastUpdate.getDay(), 
 			          		"hours": lastUpdate.getHours(),
 			          		"minutes": lastUpdate.getMinutes(),
 			            	"seconds": lastUpdate.getSeconds()
 			            };
-	updateLastUpdated(jsonLasUpdate);
+	updateLastUpdated(jsonLastUpdate);
 }
 
 function updateMinutes() {
