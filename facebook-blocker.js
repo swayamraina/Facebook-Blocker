@@ -5,7 +5,7 @@ var run = setTimeout(function() {
 }, getTime());
 
 function getTime() {
-	return getFromDB("facebook-blocker") ? 1000 : 1000*60;
+	return getFromDB("facebook-blocker") ? 1000 : 1000*60*10;
 }
 
 function init() {
