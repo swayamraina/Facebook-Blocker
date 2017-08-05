@@ -3,9 +3,12 @@ var minutes = getFromDB("minutes") != null ? syncMinutes() : 0;
 var seconds = getFromDB("seconds") != null ? syncSeconds() : 0;
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	minutes = 0;
-	seconds = 60;
-	updateLastUpdated(request.timestamp);
+	var re = new RegExp("(https:\/\/www\.facebook\.com\/)[a-zA-Z0-9\/?&=_#]*");
+	if(re.test(sender.url)) {
+		minutes = 10;
+		seconds = 0;
+		updateLastUpdated(request.timestamp);
+	}
 });
 
 var timer = setInterval(function() {
