@@ -5,16 +5,22 @@ var run = setTimeout(function() {
 }, getTime());
 
 function getTime() {
-	return getFromDB("facebook-blocker") ? 1000 : 1000*60*10;
+	return getFromDB("facebook-blocker") ? 1000 : 1000*60;
 }
 
 function init() {
+	var newTimestamp = new Date();
 	if(getFromDB("blocker-start") == null) {
-		setTimestamp(new Date());
-		// pass message here
+		var jsonTimestamp = {
+								"day": newTimestamp.getDay(), 
+						      	"hours": newTimestamp.getHours(),
+						      	"minutes": newTimestamp.getMinutes(),
+						      	"seconds": newTimestamp.getSeconds()
+						    };
+		setTimestamp(JSON.stringify(jsonTimestamp));
+		sendMessage(getFromDB("blocker-start"));
 	} else {
-		var previousTimestamp = getFromDB("blocker-start");
-		var newTimestamp = new Date();
+		var previousTimestamp = JSON.parse(getFromDB("blocker-start"));
 		if(validateTimestamp(previousTimestamp, newTimestamp)) {
 			setTimestamp(newTimestamp);
 			saveToDB("facebook-blocker", false);
@@ -23,8 +29,8 @@ function init() {
 }
 
 function validateTimestamp(oldT, newT) {
-	var dayDiff = newT.getDay() - oldT.getDay();
-	return (((dayDiff*24 + newT.getHours()) - oldT.getHours()) > 8) ? true : false;
+	var dayDiff = newT.getDay() - oldT.day;
+	return (((dayDiff*24 + newT.getHours()) - oldT.hours) > 8) ? true : false;
 }
 
 function kickStartBlocker() {
@@ -34,6 +40,10 @@ function kickStartBlocker() {
 	if(!getFromDB("facebook-blocker")) {
 		saveToDB("facebook-blocker", true);
 	}
+}
+
+function sendMessage(timestamp) {
+	chrome.runtime.sendMessage({"timestamp": timestamp});
 }
 
 function setTimestamp(data) {
@@ -47,3 +57,4 @@ function saveToDB(key, value) {
 function getFromDB(key) {
 	return localStorage.getItem(key);
 }
+
