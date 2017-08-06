@@ -18,7 +18,7 @@ function init() {
 						      	"seconds": newTimestamp.getSeconds()
 						    };
 		setTimestamp(JSON.stringify(jsonTimestamp));
-		sendMessage(getFromDB("blocker-start"));
+		sendMessage(getTimestamp());
 	} else {
 		var previousTimestamp = JSON.parse(getFromDB("blocker-start"));
 		if(validateTimestamp(previousTimestamp, newTimestamp)) {
@@ -48,6 +48,10 @@ function sendMessage(timestamp) {
 
 function setTimestamp(data) {
 	saveToDB("blocker-start", data);
+}
+
+function getTimestamp() {
+	return getFromDB("blocker-start");
 }
 
 function saveToDB(key, value) {
