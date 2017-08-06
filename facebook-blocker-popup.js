@@ -7,6 +7,8 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	if(re.test(sender.url)) {
 		minutes = 10;
 		seconds = 0;
+		saveToDB("minutes", minutes);
+		saveToDB("seconds", seconds);
 		updateLastUpdated(request.timestamp);
 	}
 });
