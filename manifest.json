@@ -11,6 +11,10 @@
     "default_popup": "facebook-blocker-popup.html" 
   },
 
+  "permissions": [
+      "tabs"
+  ],
+
   "content_scripts": [
       {
         "matches": ["https://www.facebook.com/*"],
