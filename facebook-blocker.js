@@ -1,4 +1,13 @@
+var newTimestamp = new Date();
+
 init();
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	var id = "mjobflbocmfafgpechpfjnbadfegleea";
+	if(request.origin == "facebook-blocker" && sender.id == id) {
+		sendResponse(JSON.parse(getTimestamp()));
+	}
+});
 
 var run = setTimeout(function() {
 	kickStartBlocker();
@@ -9,28 +18,30 @@ function getTime() {
 }
 
 function init() {
-	var newTimestamp = new Date();
-	if(getFromDB("blocker-start") == null) {
-		var jsonTimestamp = {
-								"day": newTimestamp.getDay(), 
-						      	"hours": newTimestamp.getHours(),
-						      	"minutes": newTimestamp.getMinutes(),
-						      	"seconds": newTimestamp.getSeconds()
-						    };
-		setTimestamp(JSON.stringify(jsonTimestamp));
-		sendMessage(getTimestamp());
+	if(getTimestamp() == null) {
+		createAndSaveTimestamp();
 	} else {
-		var previousTimestamp = JSON.parse(getFromDB("blocker-start"));
-		if(validateTimestamp(previousTimestamp, newTimestamp)) {
-			setTimestamp(newTimestamp);
+		var previousTimestamp = JSON.parse(getTimestamp());
+		if(checkValidity(previousTimestamp, newTimestamp) == false) {
+			createAndSaveTimestamp();
 			saveToDB("facebook-blocker", false);
 		}
 	}
 }
 
-function validateTimestamp(oldT, newT) {
-	var dayDiff = newT.getDay() - oldT.day;
-	return (((dayDiff*24 + newT.getHours()) - oldT.hours) > 8) ? true : false;
+function createAndSaveTimestamp() {
+	var jsonTimestamp = {
+		"day": newTimestamp.getDay(), 
+		"hours": newTimestamp.getHours(),
+		"minutes": newTimestamp.getMinutes(),
+		"seconds": newTimestamp.getSeconds()
+	};
+	setTimestamp(JSON.stringify(jsonTimestamp));
+}
+
+function checkValidity(oldT, newT) {
+	var minuteDiff = (newT.getDay()-oldT.day)*24*60 + (newT.getHours()-oldT.hours)*60 + (newT.getMinutes()-oldT.minutes);
+	return ((minuteDiff/60) >= 8) ? false : true;
 }
 
 function kickStartBlocker() {
@@ -40,10 +51,6 @@ function kickStartBlocker() {
 	if(!getFromDB("facebook-blocker")) {
 		saveToDB("facebook-blocker", true);
 	}
-}
-
-function sendMessage(timestamp) {
-	chrome.runtime.sendMessage({"timestamp": timestamp});
 }
 
 function setTimestamp(data) {
