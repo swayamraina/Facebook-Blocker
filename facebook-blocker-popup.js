@@ -1,17 +1,13 @@
-var lastUpdate = JSON.parse(getFromDB("lastUpdated"));
+var currentTime = new Date();
+var lastUpdate = getFromDB("lastUpdated")!=null ? JSON.parse(getFromDB("lastUpdated")) : 0;
 var minutes = getFromDB("minutes") != null ? syncMinutes() : 0;
 var seconds = getFromDB("seconds") != null ? syncSeconds() : 0;
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-	var re = new RegExp("(https:\/\/www\.facebook\.com\/)[a-zA-Z0-9\/?&=_#]*");
-	if(re.test(sender.url)) {
-		minutes = 10;
-		seconds = 0;
-		saveToDB("minutes", minutes);
-		saveToDB("seconds", seconds);
-		updateLastUpdated(request.timestamp);
+(function() {
+	if(minutes==0 && seconds==0 && getFromDB("facebook-blocker")==null) {
+		fetchStartTime();
 	}
-});
+})();
 
 var timer = setInterval(function() {
 	if(minutes!=0 || seconds!=0) {
@@ -35,11 +31,11 @@ function updateSeconds() {
 
 	var lastUpdate = new Date();
 	var jsonLastUpdate = {
-							"day": lastUpdate.getDay(), 
-			          		"hours": lastUpdate.getHours(),
-			          		"minutes": lastUpdate.getMinutes(),
-			            	"seconds": lastUpdate.getSeconds()
-			             };
+		"day": lastUpdate.getDay(), 
+		"hours": lastUpdate.getHours(),
+		"minutes": lastUpdate.getMinutes(),
+		"seconds": lastUpdate.getSeconds()
+	};
 	updateLastUpdated(jsonLastUpdate);
 }
 
@@ -78,13 +74,11 @@ function updateTimer() {
 }
 
 function syncMinutes() {
-	var currentTime = new Date();
 	var minutesDiff = (currentTime.getHours()*60 + currentTime.getMinutes()) - (60*lastUpdate.hours + lastUpdate.minutes);
 	return (getFromDB("minutes") - minutesDiff);
 }
 
 function syncSeconds() {
-	var currentTime = new Date();
 	var secondsDiff = (currentTime.getMinutes()*60 + currentTime.getSeconds()) - (60*lastUpdate.minutes + lastUpdate.seconds);	
 	if(getFromDB("seconds") > secondsDiff) {
 		return getFromDB("seconds") - secondsDiff;
@@ -95,6 +89,33 @@ function syncSeconds() {
 			return 60+getFromDB("seconds") - secondsDiff;
 		}
 	}
+}
+
+function fetchStartTime() {
+	var query = {url: "https://www.facebook.com/*"};
+	var request = {"action": "handshake", "origin": "facebook-blocker"};
+	chrome.tabs.query(query, function(tabs) {
+		if(tabs.length > 0) {
+			chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
+				var diff = (response.hours*60*60 + response.minutes*60 + response.seconds) - (currentTime.getHours()*60*60 + currentTime.getMinutes()*60 + currentTime.getSeconds());
+				if(diff >= 10*60) {
+					minutes = 0;
+					seconds = 0;
+				} else {
+					if(diff < 60) {
+						minutes = 9;
+						seconds = 60 - diff;
+					} else {
+						minutes = 9 - diff/60;
+						seconds = 60 - diff%60;
+					}
+				}
+				saveToDB("minutes", minutes);
+				saveToDB("seconds", seconds);
+				updateLastUpdated(respone);
+			});
+		}
+	});
 }
 
 function getFromDB(key) {
