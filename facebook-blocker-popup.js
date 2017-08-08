@@ -70,25 +70,21 @@ function updateTimer() {
 	if(seconds==0 && minutes==0) {
 		saveToDB("facebook-blocker", true);
 		clearInterval(timer);
+		deleteFromDB("minutes");
+		deleteFromDB("seconds");
 	}
 }
 
 function syncMinutes() {
-	var minutesDiff = (currentTime.getHours()*60 + currentTime.getMinutes()) - (60*lastUpdate.hours + lastUpdate.minutes);
-	return (getFromDB("minutes") - minutesDiff);
+	var minutesDiff = (currentTime.getDay()*24*60 + currentTime.getHours()*60 + currentTime.getMinutes()) - (24*60*lastUpdate.day + 60*lastUpdate.hours + lastUpdate.minutes);
+	var diff = getFromDB("minutes") - minutesDiff;
+	return (diff < 0) ? 0 : diff;
 }
 
 function syncSeconds() {
-	var secondsDiff = (currentTime.getMinutes()*60 + currentTime.getSeconds()) - (60*lastUpdate.minutes + lastUpdate.seconds);	
-	if(getFromDB("seconds") > secondsDiff) {
-		return getFromDB("seconds") - secondsDiff;
-	} else {
-		if(minutes==0) {
-			return 0;
-		} else {
-			return 60+getFromDB("seconds") - secondsDiff;
-		}
-	}
+	var secondsDiff = (currentTime.getDay()*24*60*60 + currentTime.getHours()*60*60 + currentTime.getMinutes()*60 + currentTime.getSeconds()) - (24*60*60*lastUpdate.day + 60*60*lastUpdate.hours + 60*lastUpdate.minutes + lastUpdate.seconds);	
+	var diff = getFromDB("seconds") - secondsDiff%60;
+	return (diff < 0) ? 60+diff : diff;
 }
 
 function fetchStartTime() {
@@ -124,4 +120,8 @@ function getFromDB(key) {
 
 function saveToDB(key, value) {
 	localStorage.setItem(key, value);
+}
+
+function deleteFromDB(key) {
+	localStorage.removeItem(key);
 }
