@@ -1,21 +1,31 @@
 var currentTime = new Date();
-var lastUpdate = getFromDB("lastUpdated")!=null ? JSON.parse(getFromDB("lastUpdated")) : 0;
-var minutes = getFromDB("minutes") != null ? syncMinutes() : 0;
-var seconds = getFromDB("seconds") != null ? syncSeconds() : 0;
+var lastUpdate = getFromDB("lastUpdated")!=null ? JSON.parse(getFromDB("lastUpdated")) : {"date":0,"hours":0,"minutes":0,"seconds":0};
+
+var minutes = 0;
+var seconds = 0;
 
 (function() {
-	if(minutes==0 && seconds==0 && getFromDB("facebook-blocker")==null) {
+	
+	var start = getFromDB("facebook-blocker");
+
+	if(start == null) {
 		fetchStartTime();
+	} else if(start == "false") {
+		syncTime(lastUpdate, currentTime)
 	}
+	startTimer();
+
 })();
 
-var timer = setInterval(function() {
+function startTimer() {
+	var timer = setInterval(function() {
 	if(minutes!=0 || seconds!=0) {
-		updateTime();
-		updateTimer();
-	}
-	updateDisplay();
-}, 1000);  
+			updateTime();
+			updateTimer();
+		}
+		updateDisplay();
+	}, 1000);  
+}
 
 function updateTime() {
 	updateSeconds();
@@ -31,7 +41,7 @@ function updateSeconds() {
 
 	var lastUpdate = new Date();
 	var jsonLastUpdate = {
-		"day": lastUpdate.getDay(), 
+		"date": lastUpdate.getDate(), 
 		"hours": lastUpdate.getHours(),
 		"minutes": lastUpdate.getMinutes(),
 		"seconds": lastUpdate.getSeconds()
@@ -47,7 +57,7 @@ function updateMinutes() {
 }
 
 function updateDisplay() {
-	if(getFromDB("facebook-blocker")) {
+	if(getFromDB("facebook-blocker")=="true") {
 		document.getElementById('timer').innerHTML = "Enough of facebook today!";
 	} else {
 		if(seconds==0 && minutes==0) {
@@ -58,33 +68,45 @@ function updateDisplay() {
 	}
 }
 
-function updateLastUpdated(timestamp) {
-	saveToDB("lastUpdated", JSON.stringify(timestamp));
-}
-
-function getTimeForDisplay(data) {
-	return (data < 10 ? "0"+data : data);
-}
-
 function updateTimer() {
 	if(seconds==0 && minutes==0) {
-		saveToDB("facebook-blocker", true);
+		saveToDB("facebook-blocker", "true");
 		clearInterval(timer);
 		deleteFromDB("minutes");
 		deleteFromDB("seconds");
 	}
 }
 
-function syncMinutes() {
-	var minutesDiff = (currentTime.getDay()*24*60 + currentTime.getHours()*60 + currentTime.getMinutes()) - (24*60*lastUpdate.day + 60*lastUpdate.hours + lastUpdate.minutes);
-	var diff = getFromDB("minutes") - minutesDiff;
-	return (diff < 0) ? 0 : diff;
-}
+function syncTime(oldT, newT) {
+	var dayDiff = newT.getDate() - oldT.date; 
+	var hourDiff = newT.getHours() - oldT.hours;
+	var minDiff = newT.getMinutes() - oldT.minutes;
+	var secDiff = newT.getSeconds() - oldT.seconds;
 
-function syncSeconds() {
-	var secondsDiff = (currentTime.getDay()*24*60*60 + currentTime.getHours()*60*60 + currentTime.getMinutes()*60 + currentTime.getSeconds()) - (24*60*60*lastUpdate.day + 60*60*lastUpdate.hours + 60*lastUpdate.minutes + lastUpdate.seconds);	
-	var diff = getFromDB("seconds") - secondsDiff%60;
-	return (diff < 0) ? 60+diff : diff;
+	var diff = (dayDiff*24*60*60 + hourDiff*60*60 + minDiff*60 + secDiff);
+
+	if(diff >= 10*60) {
+		minutes = 0;
+		seconds = 0;
+	} else {
+		var m = getFromDB("minutes")!=null ? getFromDB("minutes") : 9;
+		var s = getFromDB("seconds")!=null ? getFromDB("seconds") : 60;
+		if(diff > 60) {
+			var temp = m*60 + s - diff;
+			minutes = temp/60;
+			seconds = temp%60;
+		} else {
+			if(s-diff >= 0) {
+				minutes = m;
+				seconds = s-diff;
+			} else {
+				minutes = m-1;
+				seconds = 60+s-diff;
+			}
+		}
+	}
+	saveToDB("minutes", minutes);
+	saveToDB("seconds", seconds);
 }
 
 function fetchStartTime() {
@@ -93,25 +115,22 @@ function fetchStartTime() {
 	chrome.tabs.query(query, function(tabs) {
 		if(tabs.length > 0) {
 			chrome.tabs.sendMessage(tabs[0].id, request, function(response) {
-				var diff = (response.hours*60*60 + response.minutes*60 + response.seconds) - (currentTime.getHours()*60*60 + currentTime.getMinutes()*60 + currentTime.getSeconds());
-				if(diff >= 10*60) {
-					minutes = 0;
-					seconds = 0;
-				} else {
-					if(diff < 60) {
-						minutes = 9;
-						seconds = 60 - diff;
-					} else {
-						minutes = 9 - diff/60;
-						seconds = 60 - diff%60;
-					}
+				if(response != null) {
+					syncTime(response, currentTime);
+					updateLastUpdated(response);
+					saveToDB("facebook-blocker", "false");
 				}
-				saveToDB("minutes", minutes);
-				saveToDB("seconds", seconds);
-				updateLastUpdated(respone);
 			});
 		}
 	});
+}
+
+function updateLastUpdated(timestamp) {
+	saveToDB("lastUpdated", JSON.stringify(timestamp));
+}
+
+function getTimeForDisplay(data) {
+	return (data < 10 ? "0"+data : data);
 }
 
 function getFromDB(key) {
