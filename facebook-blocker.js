@@ -22,16 +22,16 @@ function init() {
 		createAndSaveTimestamp();
 	} else {
 		var previousTimestamp = JSON.parse(getTimestamp());
-		if(checkValidity(previousTimestamp, newTimestamp) == false) {
+		if(checkValidity(previousTimestamp, newTimestamp) == "false") {
 			createAndSaveTimestamp();
-			saveToDB("facebook-blocker", false);
+			saveToDB("facebook-blocker", "false");
 		}
 	}
 }
 
 function createAndSaveTimestamp() {
 	var jsonTimestamp = {
-		"day": newTimestamp.getDay(), 
+		"date": newTimestamp.getDate(), 
 		"hours": newTimestamp.getHours(),
 		"minutes": newTimestamp.getMinutes(),
 		"seconds": newTimestamp.getSeconds()
@@ -40,8 +40,8 @@ function createAndSaveTimestamp() {
 }
 
 function checkValidity(oldT, newT) {
-	var minuteDiff = (newT.getDay()-oldT.day)*24*60 + (newT.getHours()-oldT.hours)*60 + (newT.getMinutes()-oldT.minutes);
-	return ((minuteDiff/60) >= 8) ? false : true;
+	var minuteDiff = (newT.getDate()-oldT.date)*24*60 + (newT.getHours()-oldT.hours)*60 + (newT.getMinutes()-oldT.minutes);
+	return ((minuteDiff/60) >= 8) ? "false" : "true";
 }
 
 function kickStartBlocker() {
@@ -49,7 +49,7 @@ function kickStartBlocker() {
 	document.body = document.createElement("body");
 
 	if(!getFromDB("facebook-blocker")) {
-		saveToDB("facebook-blocker", true);
+		saveToDB("facebook-blocker", "true");
 	}
 }
 
