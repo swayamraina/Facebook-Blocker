@@ -5,7 +5,6 @@ var minutes = 0;
 var seconds = 0;
 
 (function() {
-	
 	var start = getFromDB("facebook-blocker");
 
 	if(start == null) {
@@ -19,7 +18,7 @@ var seconds = 0;
 
 function startTimer() {
 	var timer = setInterval(function() {
-	if(minutes!=0 || seconds!=0) {
+		if(minutes!=0 || seconds!=0) {
 			updateTime();
 			updateTimer();
 		}
@@ -78,10 +77,10 @@ function updateTimer() {
 }
 
 function syncTime(oldT, newT) {
-	var dayDiff = newT.getDate() - oldT.date; 
-	var hourDiff = newT.getHours() - oldT.hours;
-	var minDiff = newT.getMinutes() - oldT.minutes;
-	var secDiff = newT.getSeconds() - oldT.seconds;
+	var dayDiff = newT.getDate() - parseInt(oldT.date); 
+	var hourDiff = newT.getHours() - parseInt(oldT.hours);
+	var minDiff = newT.getMinutes() - parseInt(oldT.minutes);
+	var secDiff = newT.getSeconds() - parseInt(oldT.seconds);
 
 	var diff = (dayDiff*24*60*60 + hourDiff*60*60 + minDiff*60 + secDiff);
 
@@ -89,11 +88,11 @@ function syncTime(oldT, newT) {
 		minutes = 0;
 		seconds = 0;
 	} else {
-		var m = getFromDB("minutes")!=null ? getFromDB("minutes") : 9;
-		var s = getFromDB("seconds")!=null ? getFromDB("seconds") : 60;
+		var m = getFromDB("minutes")!=null ? parseInt(getFromDB("minutes")) : 9;
+		var s = getFromDB("seconds")!=null ? parseInt(getFromDB("seconds")) : 60;
 		if(diff > 60) {
 			var temp = m*60 + s - diff;
-			minutes = temp/60;
+			minutes = parseInt(temp/60);
 			seconds = temp%60;
 		} else {
 			if(s-diff >= 0) {
