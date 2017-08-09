@@ -40,7 +40,7 @@ function createAndSaveTimestamp() {
 }
 
 function checkValidity(oldT, newT) {
-	var minuteDiff = (newT.getDate()-oldT.date)*24*60 + (newT.getHours()-oldT.hours)*60 + (newT.getMinutes()-oldT.minutes);
+	var minuteDiff = (newT.getDate()-parseInt(oldT.date))*24*60 + (newT.getHours()-parseInt(oldT.hours))*60 + (newT.getMinutes()-parseInt(oldT.minutes));
 	return ((minuteDiff/60) >= 8) ? "false" : "true";
 }
 
