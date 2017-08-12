@@ -1,9 +1,20 @@
+
+
+// create timestamp on pageg load
 var currentTime = Date.now();
+
+
+// get last updated timestamp
 var lastUpdate = getFromDB("lastUpdated")!=null ? parseInt(getFromDB("lastUpdated")) : 0;
 
+// initialise timer to 0
+// later on we'll sync this time
 var minutes = 0;
 var seconds = 0;
 
+
+// check if blocker has already started
+// and sync time accordingly
 (function() {
 	var start = getFromDB("facebook-blocker");
 
@@ -16,6 +27,8 @@ var seconds = 0;
 
 })();
 
+
+// ticker display timer
 function startTimer() {
 	var timer = setInterval(function() {
 		if(minutes!=0 || seconds!=0) {
@@ -26,11 +39,17 @@ function startTimer() {
 	}, 1000);  
 }
 
+
+// update time
+// update minutes first to avoid early trigger of blocker display
 function updateTime() {
 	updateMinutes();
 	updateSeconds();
 }
 
+
+// update timestamp every second
+// this timestamp is used later on for sync
 function updateSeconds() {
 	if(seconds==0) {
 		seconds = 60;
@@ -40,6 +59,8 @@ function updateSeconds() {
 	updateLastUpdated(Date.now());
 }
 
+
+// update minutes only when required
 function updateMinutes() {
 	if(seconds==0 && minutes>0) {
 		minutes = minutes-1;
@@ -47,6 +68,8 @@ function updateMinutes() {
 	}
 }
 
+
+// update display in popup
 function updateDisplay() {
 	if(getFromDB("facebook-blocker")=="true") {
 		document.getElementById('timer').innerHTML = "Enough of facebook today!";
@@ -59,6 +82,8 @@ function updateDisplay() {
 	}
 }
 
+
+// update timer and declare blocker has started
 function updateTimer() {
 	if(seconds==0 && minutes==0) {
 		saveToDB("facebook-blocker", "true");
@@ -68,6 +93,9 @@ function updateTimer() {
 	}
 }
 
+
+// Whenever the popup is opened sync time to display
+// get the old and new timestamp and update timer 
 function syncTime(oldT, newT) {
 	var millisecDiff = parseInt(newT) - parseInt(oldT);
 	if(millisecDiff >= 10*60*1000) {
@@ -94,6 +122,11 @@ function syncTime(oldT, newT) {
 	saveToDB("seconds", seconds);
 }
 
+
+// when popup is opened send handshake message to facebook tab for time sync
+// facebook tab sends the original timestamp to be used for sync
+// timestamp from facebook tab only arrives if it has never been opened before
+// or when previous timestamp has expired
 function fetchStartTime() {
 	var query = {url: "https://www.facebook.com/*"};
 	var request = {"action": "handshake", "origin": "facebook-blocker"};
@@ -109,6 +142,9 @@ function fetchStartTime() {
 		}
 	});
 }
+
+
+//// Utility Methods ////
 
 function updateLastUpdated(timestamp) {
 	saveToDB("lastUpdated", timestamp);
