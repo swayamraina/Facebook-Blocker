@@ -1,7 +1,14 @@
+
+
+// create timestamp on page load
 var newTimestamp = Date.now();
 
+// Initialise setup everytime facebook page is loaded
 init();
 
+
+// handle handshake 
+// when the extension pop up is generated send timestamp to sync the timer
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	var id = "mjobflbocmfafgpechpfjnbadfegleea";
 	if(request.origin == "facebook-blocker" && sender.id == id) {
@@ -9,14 +16,24 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	}
 });
 
+
+// ticker as soon as Facebook starts
 var run = setTimeout(function() {
 	kickStartBlocker();
 }, getTime());
 
+
+// check if blocker is active or not
+// set trigger time accordingly
 function getTime() {
 	return (getFromDB("facebook-blocker")=="true") ? 1000 : 1000*60*10;
 }
 
+
+// initialization function
+// check if Facebook was opened before or not
+// if yes, validate previous timestamp before providing access
+// if no, generate a new timestamp
 function init() {
 	if(getTimestamp() == null) {
 		createAndSaveTimestamp();
@@ -29,15 +46,23 @@ function init() {
 	}
 }
 
+
+// save timestamp to local DB
+// for better performance and accuracy, create on page load
 function createAndSaveTimestamp() {
 	setTimestamp(newTimestamp);
 }
 
+
+// validate the passed timestamp by comparing with the newly generated one
 function checkValidity(oldT, newT) {
 	var millisecDiff = parseInt(newT) - parseInt(oldT);
 	return (parseInt(millisecDiff >= 8*60*60*1000)) ? "false" : "true";
 }
 
+
+// remove facebook data from DOM
+// TODO : add other menaingful display
 function kickStartBlocker() {
 	document.getElementsByTagName('body')[0].remove();
 	document.body = document.createElement("body");
@@ -46,6 +71,9 @@ function kickStartBlocker() {
 		saveToDB("facebook-blocker", "true");
 	}
 }
+
+
+//// Utility Methods ////
 
 function setTimestamp(data) {
 	saveToDB("facebook-blocker-timestamp", data);
