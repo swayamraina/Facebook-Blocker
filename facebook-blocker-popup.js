@@ -27,8 +27,8 @@ function startTimer() {
 }
 
 function updateTime() {
-	updateSeconds();
 	updateMinutes();
+	updateSeconds();
 }
 
 function updateSeconds() {
