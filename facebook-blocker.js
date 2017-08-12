@@ -1,11 +1,11 @@
-var newTimestamp = new Date();
+var newTimestamp = Date.now();
 
 init();
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 	var id = "mjobflbocmfafgpechpfjnbadfegleea";
 	if(request.origin == "facebook-blocker" && sender.id == id) {
-		sendResponse(JSON.parse(getTimestamp()));
+		sendResponse(getTimestamp());
 	}
 });
 
@@ -21,7 +21,7 @@ function init() {
 	if(getTimestamp() == null) {
 		createAndSaveTimestamp();
 	} else {
-		var previousTimestamp = JSON.parse(getTimestamp());
+		var previousTimestamp = getTimestamp();
 		if(checkValidity(previousTimestamp, newTimestamp) == "false") {
 			createAndSaveTimestamp();
 			saveToDB("facebook-blocker", "false");
@@ -30,18 +30,12 @@ function init() {
 }
 
 function createAndSaveTimestamp() {
-	var jsonTimestamp = {
-		"date": newTimestamp.getDate(), 
-		"hours": newTimestamp.getHours(),
-		"minutes": newTimestamp.getMinutes(),
-		"seconds": newTimestamp.getSeconds()
-	};
-	setTimestamp(JSON.stringify(jsonTimestamp));
+	setTimestamp(newTimestamp);
 }
 
 function checkValidity(oldT, newT) {
-	var minuteDiff = (newT.getDate()-parseInt(oldT.date))*24*60 + (newT.getHours()-parseInt(oldT.hours))*60 + (newT.getMinutes()-parseInt(oldT.minutes));
-	return (parseInt(minuteDiff/60) >= 8) ? "false" : "true";
+	var millisecDiff = parseInt(newT) - parseInt(oldT);
+	return (parseInt(millisecDiff >= 8*60*60*1000)) ? "false" : "true";
 }
 
 function kickStartBlocker() {
@@ -54,11 +48,11 @@ function kickStartBlocker() {
 }
 
 function setTimestamp(data) {
-	saveToDB("blocker-start", data);
+	saveToDB("facebook-blocker-timestamp", data);
 }
 
 function getTimestamp() {
-	return getFromDB("blocker-start");
+	return getFromDB("facebook-blocker-timestamp");
 }
 
 function saveToDB(key, value) {
