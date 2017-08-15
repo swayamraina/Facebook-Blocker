@@ -18,7 +18,7 @@
   "content_scripts": [
       {
         "matches": ["https://www.facebook.com/*"],
-        "js": ["facebook-blocker.js"]
+        "js": ["facebook-blocker.js", "facebook-alternative.js"]
       }
   ]
 }
