@@ -2,6 +2,13 @@ var myQuote = "Dreams are not those which come while we sleep, but Dreams are th
 
 var request = new XMLHttpRequest();
 
+request.onreadystatechange = function() {
+    if(request.status == 200 && request.readyState == 4) {
+    	var response = JSON.parse(request.responseText);
+        document.body.innerHTML = response.contents.quotes[0].quote;
+    }
+};
+
 var base_url = "https://quotes.rest/qod.json?category=";
 var type_array = ["inspire", "management", "sports", "life", "funny", "love", "art", "students"];
 
@@ -15,14 +22,9 @@ function generateUrl() {
 }
 
 function getDisplayQuote(url) {
-	request.open("GET", url, false);
+	request.open("GET", url, true);
 	request.send(null);
-	if(request.status == 200) {
-		var response = JSON.parse(request.responseText);
-		return response.contents.quotes[0].quote;
-	} else {
-		return myQuote;
-	}
+	return myQuote;
 }
 
 function saveToDB(key, value) {
