@@ -18,14 +18,33 @@ var seconds = 0;
 (function() {
 	var start = getFromDB("facebook-blocker");
 
-	if(start == null) {
-		fetchStartTime();
-	} else if(start == "false") {
-		syncTime(lastUpdate, currentTime)
+	switch(start) {
+		case null:
+			fetchStartTime();
+			break;
+		
+		case "false":
+			if((minutes|seconds) != 0) syncTime(lastUpdate, currentTime);
+			break;
+
+		case "true":
+			if(checkValidity(lastUpdate, currentTime) == "false") {
+				updateLastUpdated(Date.now());
+				saveToDB("facebook-blocker", "false");
+			}
+			break;
 	}
+
 	startTimer();
 
 })();
+
+
+// validate the passed timestamp by comparing with the newly generated one
+function checkValidity(oldT, newT) {
+	var millisecDiff = parseInt(newT) - parseInt(oldT);
+	return (parseInt(millisecDiff) >= 8*60*60*1000) ? "false" : "true";
+}
 
 
 // ticker display timer
