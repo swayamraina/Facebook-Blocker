@@ -57,7 +57,7 @@ function createAndSaveTimestamp() {
 // validate the passed timestamp by comparing with the newly generated one
 function checkValidity(oldT, newT) {
 	var millisecDiff = parseInt(newT) - parseInt(oldT);
-	return (parseInt(millisecDiff >= 8*60*60*1000)) ? "false" : "true";
+	return (parseInt(millisecDiff) >= 8*60*60*1000) ? "false" : "true";
 }
 
 
@@ -68,7 +68,7 @@ function kickStartBlocker() {
 	document.body = document.createElement("body");
 
 	var quote = getDisplayQuote(generateUrl());
-	document.body.innerHTML = quote;
+	document.body.innerHTML = quote;	
 
 	if(!getFromDB("facebook-blocker")) {
 		saveToDB("facebook-blocker", "true");
