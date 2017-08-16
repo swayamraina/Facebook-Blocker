@@ -19,14 +19,20 @@ var seconds = 0;
 	var start = getFromDB("facebook-blocker");
 
 	switch(start) {
+		// blocker not started yet
+		// we need to get the time of start
 		case null:
 			fetchStartTime();
 			break;
 		
+		// blocker timer started
+		// sync the time from previously saved timestamp
 		case "false":
 			if((minutes|seconds) != 0) syncTime(lastUpdate, currentTime);
 			break;
 
+		// blocker started and Facebook is locked
+		// need to check if timestamp has expired or not
 		case "true":
 			if(checkValidity(lastUpdate, currentTime) == "false") {
 				updateLastUpdated(Date.now());
