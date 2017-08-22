@@ -36,7 +36,7 @@ var seconds = 0;
 		case "true":
 			if(checkValidity(lastUpdate, currentTime) == "false") {
 				updateLastUpdated(Date.now());
-				saveToDB("facebook-blocker", "false");
+				deleteFromDB("facebook-blocker")
 			}
 			break;
 	}
