@@ -28,7 +28,7 @@ var seconds = 0;
 		// blocker timer started
 		// sync the time from previously saved timestamp
 		case "false":
-			if((minutes|seconds) != 0) syncTime(lastUpdate, currentTime);
+			syncTime(lastUpdate, currentTime);
 			break;
 
 		// blocker started and Facebook is locked
