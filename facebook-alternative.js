@@ -1,4 +1,4 @@
-var myQuote = "Dreams are not those which come while we sleep, but Dreams are those which don't let you sleep";
+var myQuote = "";
 
 var request = new XMLHttpRequest();
 
