@@ -26,9 +26,11 @@ var seconds = 0;
 			break;
 		
 		// blocker timer started
+		// but the blocking feature is still inactive
 		// sync the time from previously saved timestamp
 		case "false":
 			syncTime(lastUpdate, currentTime);
+			if((minutes|seconds) == 0) saveToDB("facebook-blocker", "true");
 			break;
 
 		// blocker started and Facebook is locked
@@ -56,10 +58,8 @@ function checkValidity(oldT, newT) {
 // ticker display timer
 function startTimer() {
 	var timer = setInterval(function() {
-		if(minutes!=0 || seconds!=0) {
-			updateTime();
-			updateTimer();
-		}
+		if((minutes|seconds)!=0) updateTime();
+		if((minutes|seconds)==0 && getFromDB("facebook-blocker")=="false") updateTimer();
 		updateDisplay();
 	}, 1000);  
 }
@@ -110,12 +110,10 @@ function updateDisplay() {
 
 // update timer and declare blocker has started
 function updateTimer() {
-	if(seconds==0 && minutes==0) {
-		saveToDB("facebook-blocker", "true");
-		clearInterval(timer);
-		deleteFromDB("minutes");
-		deleteFromDB("seconds");
-	}
+	saveToDB("facebook-blocker", "true");
+	clearInterval(timer);
+	deleteFromDB("minutes");
+	deleteFromDB("seconds");
 }
 
 
