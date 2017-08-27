@@ -1,0 +1,21 @@
+#quote {
+	color: black;
+	padding: 5%;
+	font-size: 36px;
+	text-shadow: 0 0px 15px #fff;
+	font-family: Helvetica, Montserrat;
+	font-weight: lighter;
+}
+
+.div {
+	height:33%;
+	width: 100%;
+	text-align: center;
+	margin: 0 0 0 0 ;
+}
+
+.p {
+	margin-top: 0;
+	margin-bottom: 0;
+	padding: 0 0 0 0;
+}
