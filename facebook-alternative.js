@@ -5,7 +5,7 @@ var request = new XMLHttpRequest();
 request.onreadystatechange = function() {
     if(request.status == 200 && request.readyState == 4) {
     	var response = JSON.parse(request.responseText);
-        document.body.innerHTML = response.contents.quotes[0].quote;
+        document.body.innerHTML = generateHtml(response.contents.quotes[0].quote);
     }
 };
 
@@ -26,6 +26,15 @@ function getDisplayQuote(url) {
 	request.send(null);
 	return myQuote;
 }
+
+function generateHtml(quote) {
+	var start = "<div class='div'><p id='quote' class='p'>";
+	var end = "</p></div>"
+	return (start + quote + end);
+}
+
+
+//// Utility Methods ////
 
 function saveToDB(key, value) {
 	localStorage.setItem(key, value);
