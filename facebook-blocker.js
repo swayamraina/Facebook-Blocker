@@ -62,7 +62,6 @@ function checkValidity(oldT, newT) {
 
 
 // remove facebook data from DOM
-// TODO : add other menaingful display
 function kickStartBlocker() {
 	document.getElementsByTagName('body')[0].remove();
 	document.body = document.createElement("body");
@@ -70,7 +69,7 @@ function kickStartBlocker() {
 	var quote = getDisplayQuote(generateUrl());
 	document.body.innerHTML = quote;	
 
-	if(!getFromDB("facebook-blocker")) {
+	if(getFromDB("facebook-blocker") != "true") {
 		saveToDB("facebook-blocker", "true");
 	}
 }
