@@ -59,6 +59,7 @@ function checkValidity(oldT, newT) {
 function startTimer() {
 	var timer = setInterval(function() {
 		if((minutes|seconds)!=0) updateTime();
+		console.log(getFromDB("facebook-blocker"));
 		if((minutes|seconds)==0 && getFromDB("facebook-blocker")=="false") updateTimer();
 		updateDisplay();
 	}, 1000);  
@@ -76,9 +77,7 @@ function updateTime() {
 // update timestamp every second
 // this timestamp is used later on for sync
 function updateSeconds() {
-	if(seconds==0) {
-		seconds = 60;
-	}
+	if(seconds==0) seconds = 60;
 	seconds = (seconds-1)%60;
 	saveToDB("seconds", seconds);
 	updateLastUpdated(Date.now());
