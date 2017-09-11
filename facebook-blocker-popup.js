@@ -59,7 +59,6 @@ function checkValidity(oldT, newT) {
 function startTimer() {
 	var timer = setInterval(function() {
 		if((minutes|seconds)!=0) updateTime();
-		console.log(getFromDB("facebook-blocker"));
 		if((minutes|seconds)==0 && getFromDB("facebook-blocker")=="false") updateTimer();
 		updateDisplay();
 	}, 1000);  
