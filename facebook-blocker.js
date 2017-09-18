@@ -26,7 +26,7 @@ var run = setTimeout(function() {
 // check if blocker is active or not
 // set trigger time accordingly
 function getTime() {
-	return (getFromDB("facebook-blocker")=="true") ? 1000 : 1000*60*10;
+	return (getFromDB("facebook-blocker")=="true") ? 1000 : ((1000*60*10)-(newTimestamp-parseInt(getFromDB("facebook-blocker-timestamp"))));
 }
 
 
