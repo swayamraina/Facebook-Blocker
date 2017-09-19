@@ -69,9 +69,7 @@ function kickStartBlocker() {
 	var quote = getDisplayQuote(generateUrl());
 	document.body.innerHTML = quote;	
 
-	if(getFromDB("facebook-blocker") != "true") {
-		saveToDB("facebook-blocker", "true");
-	}
+	saveToDB("facebook-blocker", "true");
 }
 
 
