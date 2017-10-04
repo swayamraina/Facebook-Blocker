@@ -1,4 +1,7 @@
 
+// clear storage if failed during last run
+if(parseInt(getFromDB("minutes")) == 0) deleteFromDB("minutes");
+if(parseInt(getFromDB("seconds")) == 0) deleteFromDB("seconds");
 
 // create timestamp on pageg load
 var currentTime = Date.now();
